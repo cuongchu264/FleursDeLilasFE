@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+.vite/
+*.log
+
+# ASP.NET build outputs (if the repo collects them)
+bin/
+obj/
