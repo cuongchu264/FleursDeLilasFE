@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Dashboard from '../components/Dashboard.jsx';
 import FlowerTable from '../components/FlowerTable.jsx';
+import FlowerCardList from '../components/FlowerCardList.jsx';
 import FlowerForm from '../components/FlowerForm.jsx';
 import {
   createFlower,
@@ -85,11 +86,21 @@ function FlowerPage() {
         )}
 
         {!loading && !error && (
-          <FlowerTable
-            flowers={flowers}
-            onEdit={(flower) => setEditingFlower(flower)}
-            onDelete={handleDelete}
-          />
+          <>
+            <div className="view-mode-wrapper">
+              <span className="mode-label">Card View</span>
+            </div>
+            <FlowerCardList
+              flowers={flowers}
+              onEdit={(flower) => setEditingFlower(flower)}
+              onDelete={handleDelete}
+            />
+            <FlowerTable
+              flowers={flowers}
+              onEdit={(flower) => setEditingFlower(flower)}
+              onDelete={handleDelete}
+            />
+          </>
         )}
       </section>
     </>

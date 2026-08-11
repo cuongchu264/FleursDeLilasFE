@@ -130,3 +130,46 @@ export async function getSupplies() {
   });
   return parseJsonResponse(response);
 }
+
+export async function createSupply(payload) {
+  const response = await fetch(`${API_BASE_URL}/supplies`, {
+    method: 'POST',
+    headers: getAuthHeaders({
+      'Content-Type': 'application/json'
+    }),
+    body: JSON.stringify(payload)
+  });
+
+  return parseJsonResponse(response);
+}
+
+export async function updateSupply(id, payload) {
+  const response = await fetch(`${API_BASE_URL}/supplies/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeaders({
+      'Content-Type': 'application/json'
+    }),
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'Update supply failed');
+  }
+
+  return payload;
+}
+
+export async function deleteSupply(id) {
+  const response = await fetch(`${API_BASE_URL}/supplies/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'Delete supply failed');
+  }
+
+  return true;
+}

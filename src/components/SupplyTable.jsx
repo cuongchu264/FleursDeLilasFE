@@ -1,4 +1,4 @@
-function SupplyTable({ supplies }) {
+function SupplyTable({ supplies, onEdit, onDelete }) {
   return (
     <section className="panel">
       <div className="panel-header">
@@ -13,6 +13,7 @@ function SupplyTable({ supplies }) {
               <th>Price</th>
               <th>Count</th>
               <th>Note</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -22,6 +23,12 @@ function SupplyTable({ supplies }) {
                 <td>{supply.price.toLocaleString()}₫</td>
                 <td>{supply.count}</td>
                 <td>{supply.note || 'No note'}</td>
+                <td>
+                  <div className="row-actions">
+                    <button className="small-button edit-button" onClick={() => onEdit(supply)}>Edit</button>
+                    <button className="small-button delete-button" onClick={() => onDelete(supply.id)}>Delete</button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
