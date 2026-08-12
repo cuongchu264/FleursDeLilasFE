@@ -21,6 +21,7 @@ function Layout() {
           <NavLink to="/">Dashboard</NavLink>
           <NavLink to="/flowers">Flowers</NavLink>
           <NavLink to="/supplies">Supplies</NavLink>
+          <NavLink to="/orders">Orders</NavLink>
         </nav>
 
         <div className="user-bar">

@@ -6,7 +6,7 @@ function SupplyCardList({ supplies, onEdit, onDelete }) {
           <article className="resource-card" key={supply.id}>
             <div className="card-header">
               <span className="resource-title">{supply.name}</span>
-              <span className="resource-price">{supply.price.toLocaleString()}₫</span>
+              <span className="resource-price">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(supply.price)}</span>
             </div>
 
             <div className="resource-badges">

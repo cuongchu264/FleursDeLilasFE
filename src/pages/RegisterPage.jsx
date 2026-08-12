@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../api.js';
+import ErrorCard from '../components/ErrorCard.jsx';
 
 function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -28,7 +29,12 @@ function RegisterPage() {
       setSuccess('Registration successful. Please sign in.');
       setTimeout(() => navigate('/login'), 700);
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      if (err?.status >= 500) {
+        navigate('/error-500');
+        return;
+      }
+
+      setError(err?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -66,7 +72,7 @@ function RegisterPage() {
             />
           </label>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorCard message={error} onClose={() => setError('')} />}
           {success && <p className="success-text">{success}</p>}
 
           <button type="submit" className="primary-button full-width" disabled={loading}>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api.js';
+import ErrorCard from '../components/ErrorCard.jsx';
 import { saveSession } from '../session.js';
 
 function LoginPage() {
@@ -32,7 +33,12 @@ function LoginPage() {
 
       navigate('/');
     } catch (err) {
-      setError(err.message || 'Login failed');
+      if (err?.status >= 500) {
+        navigate('/error-500');
+        return;
+      }
+
+      setError(err?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -43,7 +49,7 @@ function LoginPage() {
       <section className="login-box">
         <div className="login-header">
           <span className="brand-kicker">Fleurs de Lilas</span>
-          <h1>Welcome back</h1>
+          <h1>Welcome</h1>
           <p>Please sign in to continue</p>
         </div>
 
@@ -68,7 +74,7 @@ function LoginPage() {
             />
           </label>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <ErrorCard message={error} onClose={() => setError('')} />}
 
           <button type="submit" className="primary-button full-width" disabled={loading}>
             {loading ? 'Signing in...' : 'Login'}

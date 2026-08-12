@@ -17,8 +17,34 @@ function getAuthHeaders(headers = {}) {
 
 async function parseJsonResponse(response) {
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Request failed');
+    let message = '';
+    try {
+      const json = await response.json();
+
+      // If server returned validation ProblemDetails (errors object), flatten them
+      if (json && json.errors && typeof json.errors === 'object') {
+        const errorList = Object.values(json.errors)
+          .flat()
+          .filter(Boolean)
+          .map(String);
+
+        const title = json.title || json.message || 'Validation error';
+        message = title + (errorList.length ? ': ' + errorList.join('; ') : '');
+      } else {
+        message = json?.message || json?.error || JSON.stringify(json);
+      }
+    } catch (e) {
+      message = await response.text();
+    }
+
+    const err = new Error(message || 'Request failed');
+    err.status = response.status;
+    throw err;
+  }
+
+  // Some successful responses have no body (204 No Content, 205 Reset Content)
+  if (response.status === 204 || response.status === 205) {
+    return null;
   }
 
   return response.json();
@@ -51,12 +77,7 @@ export async function updateFlower(id, payload) {
     }),
     body: JSON.stringify(payload)
   });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Update flower failed');
-  }
-
+  await parseJsonResponse(response);
   return payload;
 }
 
@@ -65,12 +86,7 @@ export async function deleteFlower(id) {
     method: 'DELETE',
     headers: getAuthHeaders()
   });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Delete flower failed');
-  }
-
+  await parseJsonResponse(response);
   return true;
 }
 
@@ -86,17 +102,7 @@ export async function login(payload) {
     })
   });
 
-  const text = await response.text();
-
-  if (!response.ok) {
-    throw new Error(text || 'Login failed');
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    return { success: true, user: null, message: 'Login successful' };
-  }
+  return parseJsonResponse(response);
 }
 
 export async function register(payload) {
@@ -111,17 +117,7 @@ export async function register(payload) {
     })
   });
 
-  const text = await response.text();
-
-  if (!response.ok) {
-    throw new Error(text || 'Registration failed');
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    return { success: true, message: 'Registration successful' };
-  }
+  return parseJsonResponse(response);
 }
 
 export async function getSupplies() {
@@ -151,12 +147,7 @@ export async function updateSupply(id, payload) {
     }),
     body: JSON.stringify(payload)
   });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Update supply failed');
-  }
-
+  await parseJsonResponse(response);
   return payload;
 }
 
@@ -165,11 +156,6 @@ export async function deleteSupply(id) {
     method: 'DELETE',
     headers: getAuthHeaders()
   });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Delete supply failed');
-  }
-
+  await parseJsonResponse(response);
   return true;
 }

@@ -5,9 +5,14 @@ import SupplyPage from './pages/SupplyPage.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
-import { getFlowers } from './api.js';
+import Error500Page from './pages/Error500Page.jsx';
+import OrdersPage from './pages/OrdersPage.jsx';
+import ToastContainer from './components/ToastContainer.jsx';
+import { getFlowers, getSupplies } from './api.js';
 import { getSession } from './session.js';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ErrorCard from './components/ErrorCard.jsx';
 
 function ProtectedRoute({ children }) {
   const session = getSession();
@@ -21,22 +26,30 @@ function ProtectedRoute({ children }) {
 
 function DashboardPage() {
   const [flowers, setFlowers] = useState([]);
+  const [supplies, setSupplies] = useState([]);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    async function loadFlowers() {
+    async function loadData() {
       try {
-        const data = await getFlowers();
-        setFlowers(data);
+        const [flowersData, suppliesData] = await Promise.all([getFlowers(), getSupplies()]);
+        setFlowers(flowersData);
+        setSupplies(suppliesData);
       } catch (err) {
-        setError(err.message);
+        if (err?.status >= 500) {
+          navigate('/error-500');
+          return;
+        }
+
+        setError(err?.message || err.message);
       } finally {
         setLoading(false);
       }
     }
 
-    loadFlowers();
+    loadData();
   }, []);
 
   return (
@@ -46,9 +59,9 @@ function DashboardPage() {
       </div>
 
       {loading && <p>Loading data...</p>}
-      {error && <p className="error-text">{error}</p>}
+      {error && <ErrorCard message={error} onClose={() => setError('')} />}
 
-      {!loading && !error && <Dashboard flowers={flowers} />}
+      {!loading && !error && <Dashboard flowers={flowers} supplies={supplies} />}
     </section>
   );
 }
@@ -56,6 +69,7 @@ function DashboardPage() {
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -66,6 +80,8 @@ function App() {
           </ProtectedRoute>
         }>
           <Route index element={<DashboardPage />} />
+          <Route path="error-500" element={<Error500Page />} />
+          <Route path="orders" element={<OrdersPage />} />
           <Route path="flowers" element={<FlowerPage />} />
           <Route path="supplies" element={<SupplyPage />} />
         </Route>

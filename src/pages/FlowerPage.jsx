@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Dashboard from '../components/Dashboard.jsx';
+import ErrorCard from '../components/ErrorCard.jsx';
 import FlowerTable from '../components/FlowerTable.jsx';
-import FlowerCardList from '../components/FlowerCardList.jsx';
 import FlowerForm from '../components/FlowerForm.jsx';
 import {
   createFlower,
@@ -9,12 +9,15 @@ import {
   getFlowers,
   updateFlower
 } from '../api.js';
+import { showToast } from '../toast.js';
+import ConfirmModal from '../components/ConfirmModal.jsx';
 
 function FlowerPage() {
   const [flowers, setFlowers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingFlower, setEditingFlower] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState({ open: false, id: null, name: '' });
 
   async function loadFlowers() {
     try {
@@ -22,7 +25,12 @@ function FlowerPage() {
       setFlowers(data);
       setError('');
     } catch (err) {
-      setError(err.message);
+      if (err?.status >= 500) {
+        // navigate not available here; show generic server error card
+        setError('Server error occurred.');
+        return;
+      }
+      setError(err?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -37,6 +45,7 @@ function FlowerPage() {
       const newFlower = await createFlower(payload);
       setFlowers((current) => [...current, newFlower]);
       setEditingFlower(null);
+      showToast('Flower created', 'success');
     } catch (err) {
       setError(err.message);
     }
@@ -49,6 +58,7 @@ function FlowerPage() {
         current.map((flower) => flower.id === editingFlower.id ? { ...flower, ...updated } : flower)
       );
       setEditingFlower(null);
+      showToast('Flower updated', 'success');
     } catch (err) {
       setError(err.message);
     }
@@ -58,9 +68,24 @@ function FlowerPage() {
     try {
       await deleteFlower(id);
       setFlowers((current) => current.filter((flower) => flower.id !== id));
+      showToast('Flower deleted', 'success');
     } catch (err) {
       setError(err.message);
     }
+  }
+
+  function requestDelete(flower) {
+    setConfirmDelete({ open: true, id: flower.id, name: flower.name });
+  }
+
+  function cancelDelete() {
+    setConfirmDelete({ open: false, id: null, name: '' });
+  }
+
+  async function confirmDeleteHandler() {
+    if (!confirmDelete.id) return;
+    await handleDelete(confirmDelete.id);
+    cancelDelete();
   }
 
   return (
@@ -74,7 +99,7 @@ function FlowerPage() {
         </div>
 
         {loading && <p>Loading data...</p>}
-        {error && <p className="error-text">{error}</p>}
+        {error && <ErrorCard message={error} onClose={() => setError('')} />}
 
         {editingFlower && (
           <FlowerForm
@@ -86,23 +111,20 @@ function FlowerPage() {
         )}
 
         {!loading && !error && (
-          <>
-            <div className="view-mode-wrapper">
-              <span className="mode-label">Card View</span>
-            </div>
-            <FlowerCardList
-              flowers={flowers}
-              onEdit={(flower) => setEditingFlower(flower)}
-              onDelete={handleDelete}
-            />
-            <FlowerTable
-              flowers={flowers}
-              onEdit={(flower) => setEditingFlower(flower)}
-              onDelete={handleDelete}
-            />
-          </>
+          <FlowerTable
+            flowers={flowers}
+            onEdit={(flower) => setEditingFlower(flower)}
+            onDelete={(id) => requestDelete(flowers.find(f => f.id === id) || { id })}
+          />
         )}
       </section>
+      <ConfirmModal
+        open={confirmDelete.open}
+        title="Delete flower"
+        message={`Are you sure you want to delete "${confirmDelete.name}"?`}
+        onConfirm={confirmDeleteHandler}
+        onCancel={cancelDelete}
+      />
     </>
   );
 }

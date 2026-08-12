@@ -6,7 +6,7 @@ function FlowerCardList({ flowers, onEdit, onDelete }) {
           <article className="resource-card" key={flower.id}>
             <div className="card-header">
               <span className="resource-title">{flower.name}</span>
-              <span className="resource-price">{flower.price.toLocaleString()}₫</span>
+              <span className="resource-price">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(flower.price)}</span>
             </div>
 
             <div className="resource-badges">
