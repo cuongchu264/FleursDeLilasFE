@@ -159,3 +159,26 @@ export async function deleteSupply(id) {
   await parseJsonResponse(response);
   return true;
 }
+
+export async function getOrders() {
+  const response = await fetch(`${API_BASE_URL}/orders`, {
+    headers: getAuthHeaders()
+  });
+  return parseJsonResponse(response);
+}
+
+export async function getOrderById(id) {
+  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+    headers: getAuthHeaders()
+  });
+  return parseJsonResponse(response);
+}
+
+export async function createOrder(payload) {
+  const response = await fetch(`${API_BASE_URL}/orders`, {
+    method: 'POST',
+    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload)
+  });
+  return parseJsonResponse(response);
+}
