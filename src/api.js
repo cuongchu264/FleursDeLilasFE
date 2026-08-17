@@ -1,6 +1,9 @@
 import { getSession } from './session.js';
 
-const API_BASE_URL = 'https://localhost:7035/api';
+const API_BASE_URL = 
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 
+  process.env.REACT_APP_API_URL || 
+  'https://fleursdelilasbe-production.up.railway.app/api';
 
 function getAuthHeaders(headers = {}) {
   const session = getSession();
