@@ -79,11 +79,6 @@ function LoginPage() {
           <button type="submit" className="primary-button full-width" disabled={loading}>
             {loading ? 'Signing in...' : 'Login'}
           </button>
-
-          <p className="auth-link">
-            <span>New here?</span>{' '}
-            <Link to="/register">Create account</Link>
-          </p>
         </form>
       </section>
     </div>
