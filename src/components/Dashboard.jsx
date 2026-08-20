@@ -15,7 +15,7 @@ function Dashboard({ flowers = [], supplies = [] }) {
             </article>
             <article className="summary-card">
               <span className="summary-label">Total Value</span>
-              <strong>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(flowers.reduce((sum, item) => sum + item.price, 0))}</strong>
+              <strong>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(flowers.reduce((sum, item) => sum + item.price, 0))}</strong>
             </article>
           </div>
         </section>
@@ -35,7 +35,7 @@ function Dashboard({ flowers = [], supplies = [] }) {
             </article>
             <article className="summary-card">
               <span className="summary-label">Total Value</span>
-              <strong>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(supplies.reduce((sum, item) => sum + item.price, 0))}</strong>
+              <strong>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(supplies.reduce((sum, item) => sum + item.price, 0))}</strong>
             </article>
           </div>
         </section>

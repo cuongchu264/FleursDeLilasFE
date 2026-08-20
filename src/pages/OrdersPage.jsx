@@ -55,6 +55,14 @@ function OrdersPage() {
     setSelectedSupplies((s) => s.filter((_, i) => i !== index));
   }
 
+  function getFlowerUnitPrice(flower) {
+    return flower?.totalCount > 0 ? Number(flower.price) / Number(flower.totalCount) : 0;
+  }
+
+  function getSupplyUnitPrice(supply) {
+    return supply?.count > 0 ? Number(supply.price) / Number(supply.count) : 0;
+  }
+
   async function handleSubmit() {
     setError(null);
     // basic validation
@@ -120,13 +128,13 @@ function OrdersPage() {
   const flowerTotal = selectedFlowers.reduce((acc, it) => {
     const info = flowers.find(f => f.id === Number(it.id));
     if (!info) return acc;
-    return acc + (Number(info.price) * Number(it.qty || 0));
+    return acc + (getFlowerUnitPrice(info) * Number(it.qty || 0));
   }, 0);
 
   const supplyTotal = selectedSupplies.reduce((acc, it) => {
     const info = supplies.find(s => s.id === Number(it.id));
     if (!info) return acc;
-    return acc + (Number(info.price) * Number(it.qty || 0));
+    return acc + (getSupplyUnitPrice(info) * Number(it.qty || 0));
   }, 0);
 
   const bouquetPrice = Math.round((flowerTotal * 3 * 1.3 + supplyTotal * 2) * 100) / 100;
@@ -157,7 +165,7 @@ function OrdersPage() {
   }
 
   // Searchable dropdown component
-  function SearchableDropdown({ items, selectedId, selectedName, onSelect, placeholder, excludeIds = [] }) {
+  function SearchableDropdown({ items, selectedId, selectedName, onSelect, placeholder, excludeIds = [], getItemPrice }) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const ref = useRef();
@@ -187,7 +195,7 @@ function OrdersPage() {
               {filtered.map(it => (
                 <div key={it.id} className="search-option" onClick={() => { onSelect(it); setOpen(false); }}>
                   <div className="opt-name">{it.name}</div>
-                  <div className="opt-price">${Number(it.price).toFixed(2)}</div>
+                  <div className="opt-price">${Number(getItemPrice(it)).toFixed(2)}</div>
                 </div>
               ))}
               {filtered.length === 0 && <div className="search-empty">No results</div>}
@@ -238,6 +246,7 @@ function OrdersPage() {
                         selectedName={r.name}
                         excludeIds={selectedFlowers.map(x => Number(x.id)).filter(Boolean)}
                         onSelect={(it) => updateFlower(idx, { id: it.id, name: it.name, qty: it.inStock > 0 ? 1 : 0 })}
+                        getItemPrice={getFlowerUnitPrice}
                         placeholder="-- choose --"
                       />
                     </td>
@@ -261,7 +270,7 @@ function OrdersPage() {
                     </td>
                     <td className="muted">${(() => {
                       const info = flowers.find(f => f.id === Number(r.id) || f.name === r.name);
-                      return info ? (Number(info.price) * Number(r.qty || 0)).toFixed(2) : '0.00';
+                      return info ? (getFlowerUnitPrice(info) * Number(r.qty || 0)).toFixed(2) : '0.00';
                     })()}</td>
                     <td><button className="secondary-button" onClick={() => removeFlower(idx)}>Remove</button></td>
                   </tr>
@@ -295,6 +304,7 @@ function OrdersPage() {
                         selectedName={r.name}
                         excludeIds={selectedSupplies.map(x => Number(x.id)).filter(Boolean)}
                         onSelect={(it) => updateSupply(idx, { id: it.id, name: it.name, qty: it.inStock > 0 ? 1 : 0 })}
+                        getItemPrice={getSupplyUnitPrice}
                         placeholder="-- choose --"
                       />
                     </td>
@@ -318,7 +328,7 @@ function OrdersPage() {
                     </td>
                     <td className="muted">${(() => {
                       const info = supplies.find(s => s.id === Number(r.id) || s.name === r.name);
-                      return info ? (Number(info.price) * Number(r.qty || 0)).toFixed(2) : '0.00';
+                      return info ? (getSupplyUnitPrice(info) * Number(r.qty || 0)).toFixed(2) : '0.00';
                     })()}</td>
                     <td><button className="secondary-button" onClick={() => removeSupply(idx)}>Remove</button></td>
                   </tr>
