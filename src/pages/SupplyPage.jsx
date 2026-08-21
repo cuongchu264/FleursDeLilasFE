@@ -63,7 +63,6 @@ function SupplyPage() {
     }
   }
 
-  // test
   async function handleDelete(id) {
     try {
       await deleteSupply(id);
